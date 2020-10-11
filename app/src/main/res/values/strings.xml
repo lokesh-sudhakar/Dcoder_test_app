@@ -1,3 +1,28 @@
 <resources>
-    <string name="app_name">Decoder_app</string>
+    <string name="app_name">Decoder</string>
+
+    <string-array name="FileLanguage">
+        <item>All</item>
+        <item>Java</item>
+        <item>Cpp</item>
+        <item>Python 2</item>
+        <item>C</item>
+        <item>Python 3</item>
+        <item>HTML</item>
+        <item>Scala</item>
+    </string-array>
+
+    <string-array name="ProjectLanguage">
+        <item>All</item>
+        <item>HTML</item>
+        <item>Java</item>
+        <item>Python 3</item>
+        <item>Cpp</item>
+        <item>VB.Net</item>
+        <item>C Sharp</item>
+        <item>Python 2</item>
+        <item>Node Js</item>
+        <item>C Key</item>
+        <item>Scheme</item>
+    </string-array>
 </resources>
