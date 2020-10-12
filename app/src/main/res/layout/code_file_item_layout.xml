@@ -2,6 +2,12 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tool="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="codeFile"
+            type="com.example.decoder_app.model.CodeFiles" />
+    </data>
 <androidx.constraintlayout.widget.ConstraintLayout
     android:orientation="vertical"
     android:paddingLeft="12dp"
@@ -15,7 +21,7 @@
         android:id="@+id/icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_folder_white_24dp"
+        android:src="@{codeFile.isProject ? @drawable/ic_folder_white_24dp : @drawable/ic_file_white_24dp}"
         app:layout_constraintVertical_bias="0.5"
         app:layout_constraintBottom_toBottomOf="@id/subTitle"
         app:layout_constraintStart_toStartOf="parent"
@@ -35,7 +41,7 @@
         android:id="@+id/title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        tool:text="Title"
+        android:text="@{codeFile.file}"
         android:textSize="14sp"
         android:textColor="@color/white"
         android:layout_marginStart="12dp"
@@ -55,7 +61,7 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@id/user"
         app:layout_constraintTop_toBottomOf="@id/title"
-        tool:text="Titlnjefnskjefne" />
+        android:text="@{codeFile.username}" />
 
     <TextView
         android:id="@+id/starText"
@@ -67,7 +73,7 @@
         android:textSize="12sp"
         app:layout_constraintTop_toBottomOf="@id/subTitle"
         app:layout_constraintEnd_toStartOf="@id/starView"
-        tool:text="2" />
+        android:text="@{codeFile.stars.number.toString()}" />
 
     <ImageView
         android:id="@+id/starView"
