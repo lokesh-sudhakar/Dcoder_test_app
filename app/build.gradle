@@ -41,8 +41,6 @@ dependencies {
     //pagging
     implementation "androidx.paging:paging-runtime:$rootProject.paging_version"
 
-    implementation 'com.github.markomilos:paginate:0.5.1'
-
     //room
     implementation "androidx.room:room-rxjava2:$rootProject.rxJavaVersion"
     implementation "androidx.room:room-runtime:$rootProject.roomVersion"

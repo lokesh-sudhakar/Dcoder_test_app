@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">Decoder</string>
+    <string name="folder">Folder</string>
+    <string name="file">File</string>
 
     <string-array name="FileLanguage">
         <item>All</item>

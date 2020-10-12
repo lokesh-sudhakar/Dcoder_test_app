@@ -34,10 +34,7 @@ public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     private CodeRepoListAdapter adapter;
     private CompositeDisposable compositeDisposable;
-    private boolean isFolderSelected = false;
-    private String selected = "";
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,11 +50,13 @@ public class MainActivity extends AppCompatActivity {
         compositeDisposable.add(RxTextView.textChanges(binding.searchEditView)
                 .debounce(DEBOUNCE_TIME_IN_MS, TimeUnit.MILLISECONDS)
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::performSearch));
+                .subscribe(viewModel::performSearch));
     }
 
     private void initViews() {
         initRecyclerView();
+        binding.folderRadio.title.setText(getResources().getString(R.string.folder));
+        binding.fileRadio.title.setText(getResources().getString(R.string.file));
         viewModel.getCodeFilesPagedList().observe(this, codeFilesPagedList -> {
             adapter.submitList(codeFilesPagedList);
             adapter.notifyDataSetChanged();
@@ -68,7 +67,6 @@ public class MainActivity extends AppCompatActivity {
                 super.onScrollStateChanged(recyclerView, newState);
                 removeFocusFromSearch();
             }
-
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
@@ -77,17 +75,16 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     binding.codeSwitch.setVisibility(View.VISIBLE);
                 }
-
             }
         });
         setSwitchClickListener();
         switchFolderSelection();
-        initSpinner();
+        binding.searchEditView.setText(viewModel.getQueryText());
     }
 
     private void initSpinner() {
         ArrayAdapter<CharSequence> languageFileAdapter;
-        if (isFolderSelected) {
+        if (viewModel.isFolderSelected()) {
             languageFileAdapter = ArrayAdapter.createFromResource(this,
                     R.array.ProjectLanguage, android.R.layout.simple_spinner_item);
         } else {
@@ -99,12 +96,12 @@ public class MainActivity extends AppCompatActivity {
         binding.filter.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
-                selected = (String) adapterView.getItemAtPosition(position);
-                if (isFolderSelected) {
-                    binding.filterText.setText(selected);
+                viewModel.setSelectedFilter((String) adapterView.getItemAtPosition(position));
+                if (viewModel.isFolderSelected()) {
+                    binding.filterText.setText(viewModel.getSelectedFilter());
                     binding.searchEditView.setText("");
                 } else {
-                    binding.filterText.setText(selected);
+                    binding.filterText.setText(viewModel.getSelectedFilter());
                     binding.searchEditView.setText("");
                 }
             }
@@ -114,54 +111,42 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+        binding.filterText.setOnClickListener(view -> binding.filter.performClick());
     }
 
     private void setSwitchClickListener() {
-        binding.fileRadio.setOnClickListener(view -> {
-            if (isFolderSelected) {
+        binding.fileRadio.icon.setOnClickListener(view -> {
+            if (viewModel.isFolderSelected()) {
+                viewModel.setFolderSelected(!viewModel.isFolderSelected());
+                viewModel.setSelectedFilter("");
                 switchFolderSelection();
+
             }
         });
-        binding.folderRadio.setOnClickListener(view -> {
-            if (!isFolderSelected) {
+        binding.folderRadio.icon.setOnClickListener(view -> {
+            if (!viewModel.isFolderSelected()) {
+                viewModel.setFolderSelected(!viewModel.isFolderSelected());
+                viewModel.setSelectedFilter("");
                 switchFolderSelection();
             }
         });
     }
 
     public void switchFolderSelection() {
-        isFolderSelected=!isFolderSelected;
-        selected = "";
-        if (isFolderSelected) {
+        if (viewModel.isFolderSelected()) {
             viewModel.getFilterConditionLiveData().setValue(new FilterConditions.Builder(FilterType.Folder).build());
-            binding.folderRadio.setImageDrawable(getResources().getDrawable(R.drawable.ic_folder_blue_24dp));
-            binding.fileRadio.setImageDrawable(getResources().getDrawable(R.drawable.ic_file_white_24dp));
-            binding.folderText.setTextColor(getResources().getColor(R.color.blue));
-            binding.filterText.setTextColor(getResources().getColor(R.color.white));
+            binding.folderRadio.icon.setImageDrawable(getResources().getDrawable(R.drawable.ic_folder_blue_24dp));
+            binding.fileRadio.icon.setImageDrawable(getResources().getDrawable(R.drawable.ic_file_white_24dp));
+            binding.folderRadio.title.setTextColor(getResources().getColor(R.color.blue));
+            binding.fileRadio.title.setTextColor(getResources().getColor(R.color.white));
         } else {
             viewModel.getFilterConditionLiveData().setValue(new FilterConditions.Builder(FilterType.File).build());
-            binding.fileRadio.setImageDrawable(getResources().getDrawable(R.drawable.ic_file_blue_24dp));
-            binding.folderRadio.setImageDrawable(getResources().getDrawable(R.drawable.ic_folder_white_24dp));
-            binding.folderText.setTextColor(getResources().getColor(R.color.white));
-            binding.filterText.setTextColor(getResources().getColor(R.color.blue));
+            binding.fileRadio.icon.setImageDrawable(getResources().getDrawable(R.drawable.ic_file_blue_24dp));
+            binding.folderRadio.icon.setImageDrawable(getResources().getDrawable(R.drawable.ic_folder_white_24dp));
+            binding.folderRadio.title.setTextColor(getResources().getColor(R.color.white));
+            binding.fileRadio.title.setTextColor(getResources().getColor(R.color.blue));
         }
         initSpinner();
-    }
-
-    private void performSearch(CharSequence query) {
-        FilterConditions conditions;
-        if (isFolderSelected) {
-             conditions = new FilterConditions.Builder(FilterType.Folder)
-                    .setQuery(query.toString())
-                     .setProjectLanguage(BasicUtils.getFolderLanguageSelected(selected))
-                    .build();
-        } else {
-             conditions = new FilterConditions.Builder(FilterType.File)
-                    .setQuery(query.toString())
-                     .setFileLanguage(BasicUtils.getFileLanguageSelected(selected))
-                     .build();
-        }
-        viewModel.getFilterConditionLiveData().setValue(conditions);
     }
 
     private void removeFocusFromSearch() {
@@ -178,4 +163,9 @@ public class MainActivity extends AppCompatActivity {
         binding.recyclerView.setAdapter(adapter);
     }
 
+    @Override
+    protected void onDestroy() {
+        compositeDisposable.clear();
+        super.onDestroy();
+    }
 }
