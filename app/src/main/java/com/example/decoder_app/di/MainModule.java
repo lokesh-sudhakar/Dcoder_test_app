@@ -2,6 +2,7 @@ package com.example.decoder_app.di;
 
 import android.app.Application;
 
+import com.example.decoder_app.BuildConfig;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -42,7 +43,7 @@ public class MainModule {
                 .setLenient()
                 .create();
         retrofit = new Retrofit.Builder()
-                .baseUrl("https://testdata.dcoder.tech")
+                .baseUrl(BuildConfig.BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .build();
